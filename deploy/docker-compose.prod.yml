@@ -3,6 +3,11 @@
 # do host (nginx do grupof2.tech) encaminha /quitanda/ para ele.
 # Uso: docker compose -f docker-compose.prod.yml --env-file .env up -d --build
 
+# Nome de projeto explícito: evita colisão com outras stacks cujo compose também
+# fica numa pasta "deploy/" (ex.: /opt/quadraapp/deploy). Sem isso, o Compose usa
+# o nome da pasta ("deploy") e mistura os containers/imagens dos projetos.
+name: fluxocaixa
+
 services:
   db:
     image: postgres:17-alpine
