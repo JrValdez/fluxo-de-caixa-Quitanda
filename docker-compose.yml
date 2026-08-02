@@ -1,0 +1,34 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: fluxocaixa-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fluxocaixa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fluxocaixa_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-fluxocaixa}
+    ports:
+      - "5432:5432"
+    volumes:
+      - fluxocaixa_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fluxocaixa} -d ${POSTGRES_DB:-fluxocaixa}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: fluxocaixa-pgadmin
+    restart: unless-stopped
+    profiles: ["tools"]
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@quitandasdabadia.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+volumes:
+  fluxocaixa_pgdata:
