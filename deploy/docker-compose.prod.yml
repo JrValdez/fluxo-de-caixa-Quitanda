@@ -1,0 +1,51 @@
+# Stack de produção: PostgreSQL + API .NET + Flutter Web (nginx).
+# Só o serviço "web" é exposto (na porta do host WEB_PORT); o reverse proxy
+# do host (nginx do grupof2.tech) encaminha /quitanda/ para ele.
+# Uso: docker compose -f docker-compose.prod.yml --env-file .env up -d --build
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - fluxocaixa_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ../backend
+    restart: unless-stopped
+    environment:
+      TZ: America/Sao_Paulo
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Postgres: "Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      Jwt__Chave: ${JWT_KEY}
+      Jwt__Emissor: FluxoCaixa
+      Jwt__Audiencia: FluxoCaixaApp
+      Jwt__ExpiracaoMinutos: "480"
+      Seed__AdminEmail: ${ADMIN_EMAIL}
+      Seed__AdminSenha: ${ADMIN_SENHA}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ../frontend/fluxo_caixa_app
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8091}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  fluxocaixa_pgdata:

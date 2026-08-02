@@ -1,0 +1,23 @@
+# Blocos de location para o app sob o caminho /quitanda/ no grupof2.tech.
+# Adicione DENTRO do server block HTTPS (listen 443) do grupof2.tech,
+# antes do "location / { ... }" do Dota. Depois: nginx -t && systemctl reload nginx.
+#
+# O container web da stack roda em WEB_PORT (padrão 8091).
+
+    location /quitanda/api/ {
+        proxy_pass http://localhost:8091/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /quitanda/ {
+        proxy_pass http://localhost:8091/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
