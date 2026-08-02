@@ -35,8 +35,8 @@ public static class DbSeeder
         }
 
         // Usuário admin
-        var adminEmail = config["Seed:AdminEmail"] ?? "admin@quitandasdabadia.com";
-        var adminSenha = config["Seed:AdminSenha"] ?? "Badia@2026";
+        var adminEmail = config["Seed:AdminEmail"] ?? "junior322222@gmail.com";
+        var adminSenha = config["Seed:AdminSenha"] ?? "123456";
         if (await userManager.FindByEmailAsync(adminEmail) is null)
         {
             var admin = new ApplicationUser

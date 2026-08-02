@@ -67,6 +67,8 @@ class UsuariosRepository {
 
   Future<void> redefinirSenha(String id, String novaSenha) =>
       _dio.post('/usuarios/$id/redefinir-senha', data: {'novaSenha': novaSenha});
+
+  Future<void> excluir(String id) => _dio.delete('/usuarios/$id');
 }
 
 final usuariosRepositoryProvider =

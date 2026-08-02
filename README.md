@@ -37,8 +37,8 @@ flutter run -d chrome --dart-define=API_URL=http://localhost:5080
 ```
 
 ## Acesso inicial (seed)
-- **E-mail:** admin@quitandasdabadia.com
-- **Senha:** Badia@2026
+- **E-mail:** junior322222@gmail.com
+- **Senha:** 123456
 - Perfis: **Admin** (tudo), **Operador** (lança dados), **Visualizador** (leitura).
 
 > Troque a chave JWT e a senha do admin em produção (ver `appsettings.json` / seção `Seed` e `Jwt`).

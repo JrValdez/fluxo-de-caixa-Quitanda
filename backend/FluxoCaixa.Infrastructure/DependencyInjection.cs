@@ -24,8 +24,12 @@ public static class DependencyInjection
         services.AddIdentityCore<ApplicationUser>(options =>
             {
                 options.User.RequireUniqueEmail = true;
-                options.Password.RequiredLength = 8;
+                // Política de senha simplificada (uso interno): permite senhas curtas como "123456".
+                options.Password.RequiredLength = 6;
                 options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireDigit = false;
             })
             .AddRoles<ApplicationRole>()
             .AddEntityFrameworkStores<AppDbContext>()

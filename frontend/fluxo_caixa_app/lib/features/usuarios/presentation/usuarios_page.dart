@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/estados.dart';
 import '../../auth/domain/usuario.dart';
+import '../../cadastros/presentation/widgets/cadastro_scaffold.dart';
 import '../data/usuarios_repository.dart';
 import '../../../core/utils/dialogos.dart';
 
@@ -71,6 +72,11 @@ class UsuariosPage extends ConsumerWidget {
                                       icon: const Icon(Icons.key_outlined, size: 20),
                                       onPressed: () => _redefinirSenha(context, ref, u),
                                     ),
+                                    IconButton(
+                                      tooltip: 'Excluir',
+                                      icon: const Icon(Icons.delete_outline, size: 20),
+                                      onPressed: () => _excluir(context, ref, u),
+                                    ),
                                   ],
                                 )),
                               ]))
@@ -94,6 +100,16 @@ class UsuariosPage extends ConsumerWidget {
     ref.invalidate(usuariosListProvider);
   }
 
+  Future<void> _excluir(BuildContext context, WidgetRef ref, UsuarioAdmin u) async {
+    if (await confirmarExclusao(context, u.nomeCompleto) != true) return;
+    try {
+      await ref.read(usuariosRepositoryProvider).excluir(u.id);
+      ref.invalidate(usuariosListProvider);
+    } catch (e) {
+      if (context.mounted) mostrarErroExclusao(context, e);
+    }
+  }
+
   Future<void> _redefinirSenha(BuildContext context, WidgetRef ref, UsuarioAdmin u) async {
     final ctrl = TextEditingController();
     final ok = await showDialog<bool>(
@@ -103,7 +119,7 @@ class UsuariosPage extends ConsumerWidget {
         content: TextField(
           controller: ctrl,
           obscureText: true,
-          decoration: const InputDecoration(labelText: 'Nova senha (mín. 8 caracteres)'),
+          decoration: const InputDecoration(labelText: 'Nova senha (mín. 6 caracteres)'),
         ),
         actions: [
           TextButton(onPressed: () => fecharDialogo(dctx, false), child: const Text('Cancelar')),
@@ -111,7 +127,7 @@ class UsuariosPage extends ConsumerWidget {
         ],
       ),
     );
-    if (ok == true && ctrl.text.length >= 8) {
+    if (ok == true && ctrl.text.length >= 6) {
       await ref.read(usuariosRepositoryProvider).redefinirSenha(u.id, ctrl.text);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -237,8 +253,8 @@ class _UsuarioDialogState extends ConsumerState<_UsuarioDialog> {
                 TextFormField(
                   controller: _senha,
                   obscureText: true,
-                  decoration: const InputDecoration(labelText: 'Senha (mín. 8 caracteres)'),
-                  validator: (v) => (v == null || v.length < 8) ? 'Mínimo 8 caracteres' : null,
+                  decoration: const InputDecoration(labelText: 'Senha (mín. 6 caracteres)'),
+                  validator: (v) => (v == null || v.length < 6) ? 'Mínimo 6 caracteres' : null,
                 ),
               ],
               const SizedBox(height: 12),

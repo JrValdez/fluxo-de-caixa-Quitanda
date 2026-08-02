@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using FluxoCaixa.Application.Features.Auth;
 using FluxoCaixa.Domain.Constants;
 using FluxoCaixa.Infrastructure.Identity;
@@ -81,6 +82,32 @@ public class UsuariosController : ControllerBase
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
         var result = await _userManager.ResetPasswordAsync(user, token, request.NovaSenha);
+        if (!result.Succeeded)
+            return BadRequest(new { erros = result.Errors.Select(e => e.Description) });
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Excluir(Guid id)
+    {
+        var user = await _userManager.FindByIdAsync(id.ToString());
+        if (user is null) return NotFound();
+
+        // Não pode excluir o próprio usuário logado.
+        var meuId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (meuId == id.ToString())
+            return BadRequest(new { mensagem = "Você não pode excluir o próprio usuário." });
+
+        // Não pode excluir o último administrador.
+        if (await _userManager.IsInRoleAsync(user, Roles.Admin))
+        {
+            var admins = await _userManager.GetUsersInRoleAsync(Roles.Admin);
+            if (admins.Count <= 1)
+                return BadRequest(new { mensagem = "Não é possível excluir o último administrador." });
+        }
+
+        var result = await _userManager.DeleteAsync(user);
         if (!result.Succeeded)
             return BadRequest(new { erros = result.Errors.Select(e => e.Description) });
 
