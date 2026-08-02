@@ -1,6 +1,5 @@
 # ---- build (Flutter Web) ----
-# Versão fixa: traz Dart >= 3.12.2 exigido pelo pubspec (a tag :stable pode estar atrás).
-FROM ghcr.io/cirruslabs/flutter:3.44.8 AS build
+FROM ghcr.io/cirruslabs/flutter:stable AS build
 WORKDIR /app
 COPY pubspec.yaml ./
 RUN flutter pub get
